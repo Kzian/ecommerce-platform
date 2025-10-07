@@ -19,11 +19,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run API tests
+      - name: Install and Test API
         working-directory: api
         run: |
-          npm ci || npm install
+          npm install
+          chmod +x ./node_modules/.bin/jest || true
           npx jest --runInBand || echo "No tests found, skipping"
+
 
       - name: Install dependencies (Webapp)
         working-directory: webapp
