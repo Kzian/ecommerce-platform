@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install and test API
+      - name: Run API tests
         working-directory: api
         run: |
           npm ci || npm install
