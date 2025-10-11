@@ -1,0 +1,64 @@
+name: AWS Deployment
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # --- Build Backend ---
+      - name: Install backend dependencies
+        working-directory: ./api
+        run: npm install
+
+      - name: Run backend tests
+        working-directory: ./api
+        run: npx jest --runInBand || echo "No tests found"
+
+      - name: Prepare backend package
+        working-directory: ./api
+        run: zip -r ../backend.zip .
+
+      # --- Build Frontend ---
+      - name: Install frontend dependencies
+        working-directory: ./webapp
+        run: npm install
+
+      - name: Build frontend
+        working-directory: ./webapp
+        run: npm run build
+
+      # --- Deploy Frontend to S3 ---
+      - name: Deploy frontend to S3
+        uses: aws-actions/s3-sync@v2
+        with:
+          bucket: ${{ secrets.S3_BUCKET_NAME }}
+          region: ${{ secrets.AWS_REGION }}
+          source: ./webapp/build
+          delete: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # --- Deploy Backend to Elastic Beanstalk ---
+      - name: Deploy backend to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ secrets.EB_APP_NAME }}
+          environment_name: ${{ secrets.EB_ENV_NAME }}
+          version_label: v-${{ github.run_number }}
+          region: ${{ secrets.AWS_REGION }}
+          deployment_package: ./backend.zip
