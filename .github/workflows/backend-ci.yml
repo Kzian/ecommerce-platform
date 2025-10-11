@@ -5,8 +5,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./api  # ✅ ensures all commands run from /api
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -14,11 +19,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        working-directory: ./api
         run: npm install
 
       - name: Run tests
-        working-directory: ./api
-        run: |
-          chmod +x ./node_modules/.bin/jest || true
-          npx jest --runInBand || echo "No tests found, skipping"
+        run: npx jest --runInBand || echo "No tests found, skipping"
