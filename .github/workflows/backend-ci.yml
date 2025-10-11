@@ -2,16 +2,15 @@ name: Backend CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  backend:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./api  # ✅ ensures all commands run from /api
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Display folder structure (debug)
+        run: ls -R
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -20,6 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./api
 
       - name: Run tests
         run: npx jest --runInBand || echo "No tests found, skipping"
+        working-directory: ./api
