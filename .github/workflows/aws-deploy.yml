@@ -28,7 +28,9 @@ jobs:
 
       - name: Prepare backend package
         working-directory: ./api
-        run: zip -r ../backend.zip .
+        run: |
+          rm -rf node_modules
+          zip -r ../backend.zip .
 
       # --- Build Frontend ---
       - name: Install frontend dependencies
