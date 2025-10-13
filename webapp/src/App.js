@@ -6,7 +6,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/products")
+      .get("http://ecommerce-backend-env.eba-amthwwmn.us-east-1.elasticbeanstalk.com/products")
       .then((response) => setProducts(response.data))
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
